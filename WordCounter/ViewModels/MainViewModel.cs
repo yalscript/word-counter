@@ -1,6 +1,14 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
+using WordCounter.Models;
 using WordCounter.Services;
 
 namespace WordCounter.ViewModels
@@ -52,6 +60,22 @@ namespace WordCounter.ViewModels
         }
 
         /// <summary>
+        /// Gets the list of files where a text coincidence have occurred.
+        /// </summary>
+        public ObservableCollection<TextCoincidenceModel> TextCoincidences { get; } = new ObservableCollection<TextCoincidenceModel>();
+
+        /// <summary>
+        /// Gets the number of times that a certain text has been found in all the text files of a directory (and its directories).
+        /// </summary>
+        public int TotalCoincidences
+        {
+            get
+            {
+                return TextCoincidences.Sum(x => x.Coincidences);
+            }
+        }
+
+        /// <summary>
         /// Gets the selected directory command to open the directory picker dialog.
         /// </summary>
         public RelayCommand SelectDirectoryCommand { get; }
@@ -91,7 +115,36 @@ namespace WordCounter.ViewModels
         /// </summary>
         private void SearchTextInDirectory()
         {
-            
+            try
+            {
+                TextCoincidences.Clear();
+
+                foreach (string filePath in _fileService.GetTextFilePaths(SelectedDirectory, true))
+                {
+                    var coincidences = _fileService.CountTextCoincidences(filePath, TextToSearch);
+                    if (coincidences <= 0)
+                    {
+                        continue;
+                    }
+
+                    TextCoincidences.Add(new TextCoincidenceModel()
+                    {
+                        FilePath = filePath,
+                        Coincidences = coincidences
+                    });
+                }
+
+                OnPropertyChanged(nameof(TotalCoincidences));
+
+                if (!TextCoincidences.Any())
+                {
+                    MessageBox.Show(string.Format("We have not found any file containing the text [{0}]", TextToSearch), "Information");
+                }
+            } 
+            catch (DirectoryNotFoundException)
+            {
+                MessageBox.Show(string.Format("The directory [{0}] was not found.", SelectedDirectory), "Error");
+            }
         }
 
         /// <summary>

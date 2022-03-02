@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         DataContext="{Binding Source={StaticResource Locator}, Path=MainViewModel}"
+        WindowStartupLocation="CenterScreen"
         Title="Word Counter Application" Height="550" Width="800">
     <Grid Margin="10">
         <Grid.RowDefinitions>
@@ -27,16 +28,16 @@
         <Label Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center" Content="Search:" />
         <TextBox Grid.Row="1" Grid.Column="1" Height="30" Grid.ColumnSpan="2" VerticalContentAlignment="Center" Text="{Binding TextToSearch, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
-        <Button Grid.Row="2" Grid.Column="1" Height="30" Width="150" Grid.ColumnSpan="2" HorizontalAlignment="Right" Content="Search all" Command="{Binding SearchTextInDirectoryCommand}"/>
+        <Button Grid.Row="2" Grid.Column="1" Height="30" Width="150" Grid.ColumnSpan="2" HorizontalAlignment="Right" Content="Search" Command="{Binding SearchTextInDirectoryCommand}"/>
 
-        <DataGrid Grid.Row="3" Grid.ColumnSpan="3" Margin="0 10 0 0">
+        <DataGrid Grid.Row="3" Grid.ColumnSpan="3" Margin="0 10 0 0" ItemsSource="{Binding TextCoincidences}" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Filename" Width="*"></DataGridTextColumn>
-                <DataGridTextColumn Header="Occurrences" Width="150"></DataGridTextColumn>
+                <DataGridTextColumn Header="File path" Width="*" Binding="{Binding FilePath}" />
+                <DataGridTextColumn Header="Coincidences" Width="150" Binding="{Binding Coincidences}" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <Label Grid.Row="4" Grid.Column="1" VerticalContentAlignment="Center" HorizontalAlignment="Right" Content="Total of occurrences:" />
-        <TextBox Grid.Row="4" Grid.Column="2" Height="30" VerticalContentAlignment="Center" IsEnabled="false"/>
+        <Label Grid.Row="4" Grid.Column="1" VerticalContentAlignment="Center" HorizontalAlignment="Right" Content="Total number of coincidences:" />
+        <TextBox Grid.Row="4" Grid.Column="2" Height="30" VerticalContentAlignment="Center" IsReadOnly="true" Text="{Binding TotalCoincidences, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
     </Grid>
 </Window>

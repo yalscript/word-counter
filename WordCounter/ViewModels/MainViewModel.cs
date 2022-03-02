@@ -1,6 +1,14 @@
 ﻿using Microsoft.Toolkit.Mvvm.ComponentModel;
 using Microsoft.Toolkit.Mvvm.Input;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Input;
+using WordCounter.Models;
 using WordCounter.Services;
 
 namespace WordCounter.ViewModels
@@ -26,7 +34,11 @@ namespace WordCounter.ViewModels
         public string SelectedDirectory
         {
             get { return _selectedDirectory; }
-            set { SetProperty(ref _selectedDirectory, value); }
+            set
+            {
+                SetProperty(ref _selectedDirectory, value);
+                SearchTextInDirectoryCommand.NotifyCanExecuteChanged();
+            }
         }
 
         /// <summary>
@@ -40,13 +52,38 @@ namespace WordCounter.ViewModels
         public string TextToSearch
         {
             get { return _textToSearch; }
-            set { SetProperty(ref _textToSearch, value); }
+            set
+            {
+                SetProperty(ref _textToSearch, value);
+                SearchTextInDirectoryCommand.NotifyCanExecuteChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of files where a text coincidence have occurred.
+        /// </summary>
+        public ObservableCollection<TextCoincidenceModel> TextCoincidences { get; } = new ObservableCollection<TextCoincidenceModel>();
+
+        /// <summary>
+        /// Gets the number of times that a certain text has been found in all the text files of a directory (and its directories).
+        /// </summary>
+        public int TotalCoincidences
+        {
+            get
+            {
+                return TextCoincidences.Sum(x => x.Coincidences);
+            }
         }
 
         /// <summary>
         /// Gets the selected directory command to open the directory picker dialog.
         /// </summary>
-        public ICommand SelectDirectoryCommand { get; }
+        public RelayCommand SelectDirectoryCommand { get; }
+
+        /// <summary>
+        /// Gets the command for searching the given text in the given directory.
+        /// </summary>
+        public RelayCommand SearchTextInDirectoryCommand { get; }
 
         /// <summary>
         /// Constructor of the class. The <see cref="IFileService"/> is needed.
@@ -57,6 +94,7 @@ namespace WordCounter.ViewModels
             _fileService = fileService;
 
             SelectDirectoryCommand = new RelayCommand(SelectDirectory);
+            SearchTextInDirectoryCommand = new RelayCommand(SearchTextInDirectory, SearchTextInDirectoryCommandCanExecute);
         }
 
         /// <summary>
@@ -70,6 +108,52 @@ namespace WordCounter.ViewModels
             {
                 SelectedDirectory = selectedDirectory;
             }
+        }
+
+        /// <summary>
+        /// Searches a certain text in the specified directory.
+        /// </summary>
+        private void SearchTextInDirectory()
+        {
+            try
+            {
+                TextCoincidences.Clear();
+
+                foreach (string filePath in _fileService.GetTextFilePaths(SelectedDirectory, true))
+                {
+                    var coincidences = _fileService.CountTextCoincidences(filePath, TextToSearch);
+                    if (coincidences <= 0)
+                    {
+                        continue;
+                    }
+
+                    TextCoincidences.Add(new TextCoincidenceModel()
+                    {
+                        FilePath = filePath,
+                        Coincidences = coincidences
+                    });
+                }
+
+                OnPropertyChanged(nameof(TotalCoincidences));
+
+                if (!TextCoincidences.Any())
+                {
+                    MessageBox.Show(string.Format("We have not found any file containing the text [{0}]", TextToSearch), "Information");
+                }
+            } 
+            catch (DirectoryNotFoundException)
+            {
+                MessageBox.Show(string.Format("The directory [{0}] was not found.", SelectedDirectory), "Error");
+            }
+        }
+
+        /// <summary>
+        /// Checks if the search operation can be executed
+        /// </summary>
+        /// <returns>Returns whether the user has filled the form or not</returns>
+        private bool SearchTextInDirectoryCommandCanExecute()
+        {
+            return !string.IsNullOrWhiteSpace(SelectedDirectory) && !string.IsNullOrWhiteSpace(TextToSearch);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Windows;
+using WordCounter.Services;
 using WordCounter.ViewModels;
 using WordCounter.Views;
 
@@ -36,6 +37,9 @@ namespace WordCounter
 
             // Register the Views
             services.AddTransient<MainView>();
+
+            // Register the services
+            services.AddSingleton<IFileService, FileService>();
 
             return services.BuildServiceProvider();
         }

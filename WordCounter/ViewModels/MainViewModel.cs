@@ -26,7 +26,11 @@ namespace WordCounter.ViewModels
         public string SelectedDirectory
         {
             get { return _selectedDirectory; }
-            set { SetProperty(ref _selectedDirectory, value); }
+            set
+            {
+                SetProperty(ref _selectedDirectory, value);
+                SearchTextInDirectoryCommand.NotifyCanExecuteChanged();
+            }
         }
 
         /// <summary>
@@ -40,13 +44,22 @@ namespace WordCounter.ViewModels
         public string TextToSearch
         {
             get { return _textToSearch; }
-            set { SetProperty(ref _textToSearch, value); }
+            set
+            {
+                SetProperty(ref _textToSearch, value);
+                SearchTextInDirectoryCommand.NotifyCanExecuteChanged();
+            }
         }
 
         /// <summary>
         /// Gets the selected directory command to open the directory picker dialog.
         /// </summary>
-        public ICommand SelectDirectoryCommand { get; }
+        public RelayCommand SelectDirectoryCommand { get; }
+
+        /// <summary>
+        /// Gets the command for searching the given text in the given directory.
+        /// </summary>
+        public RelayCommand SearchTextInDirectoryCommand { get; }
 
         /// <summary>
         /// Constructor of the class. The <see cref="IFileService"/> is needed.
@@ -57,6 +70,7 @@ namespace WordCounter.ViewModels
             _fileService = fileService;
 
             SelectDirectoryCommand = new RelayCommand(SelectDirectory);
+            SearchTextInDirectoryCommand = new RelayCommand(SearchTextInDirectory, SearchTextInDirectoryCommandCanExecute);
         }
 
         /// <summary>
@@ -70,6 +84,23 @@ namespace WordCounter.ViewModels
             {
                 SelectedDirectory = selectedDirectory;
             }
+        }
+
+        /// <summary>
+        /// Searches a certain text in the specified directory.
+        /// </summary>
+        private void SearchTextInDirectory()
+        {
+            
+        }
+
+        /// <summary>
+        /// Checks if the search operation can be executed
+        /// </summary>
+        /// <returns>Returns whether the user has filled the form or not</returns>
+        private bool SearchTextInDirectoryCommandCanExecute()
+        {
+            return !string.IsNullOrWhiteSpace(SelectedDirectory) && !string.IsNullOrWhiteSpace(TextToSearch);
         }
     }
 }

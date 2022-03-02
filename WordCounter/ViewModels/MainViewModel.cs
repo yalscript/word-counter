@@ -30,6 +30,20 @@ namespace WordCounter.ViewModels
         }
 
         /// <summary>
+        /// Stores the text that the user wants to search
+        /// </summary>
+        private string _textToSearch;
+
+        /// <summary>
+        /// Gets or sets the text that the user wants to search. Updates the UI when set.
+        /// </summary>
+        public string TextToSearch
+        {
+            get { return _textToSearch; }
+            set { SetProperty(ref _textToSearch, value); }
+        }
+
+        /// <summary>
         /// Gets the selected directory command to open the directory picker dialog.
         /// </summary>
         public ICommand SelectDirectoryCommand { get; }

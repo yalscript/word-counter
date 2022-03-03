@@ -7,7 +7,7 @@ using Xunit;
 
 namespace WordCounter.Tests
 {
-    public class MainViewModelIntegration
+    public class MainViewModelIntegrationTest
     {
         [Fact]
         public void Search_text_in_directory()

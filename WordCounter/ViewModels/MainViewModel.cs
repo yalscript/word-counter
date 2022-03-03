@@ -3,11 +3,13 @@ using Microsoft.Toolkit.Mvvm.Input;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using WordCounter.Exceptions;
 using WordCounter.Models;
 using WordCounter.Services;
 
@@ -102,11 +104,19 @@ namespace WordCounter.ViewModels
         /// </summary>
         private void SelectDirectory()
         {
-            var selectedDirectory = _fileService.OpenDirectoryPickerDialog();
-            
-            if (!string.IsNullOrWhiteSpace(selectedDirectory))
+            try
             {
-                SelectedDirectory = selectedDirectory;
+                var selectedDirectory = _fileService.OpenDirectoryPickerDialog();
+
+                if (!string.IsNullOrWhiteSpace(selectedDirectory))
+                {
+                    SelectedDirectory = selectedDirectory;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An unexpected error has occurred", "Error");
+                Trace.WriteLine(ex.Message);
             }
         }
 
@@ -141,9 +151,15 @@ namespace WordCounter.ViewModels
                     MessageBox.Show(string.Format("We have not found any file containing the text [{0}]", TextToSearch), "Information");
                 }
             } 
-            catch (DirectoryNotFoundException)
+            catch (DirectoryNotFoundAppException ex)
             {
-                MessageBox.Show(string.Format("The directory [{0}] was not found.", SelectedDirectory), "Error");
+                MessageBox.Show(ex.Message, "Error");
+                Trace.WriteLine(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An unexpected error has occurred", "Error");
+                Trace.WriteLine(ex.Message);
             }
         }
 

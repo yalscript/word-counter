@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using WordCounter.Exceptions;
 
 namespace WordCounter.Services
 {
@@ -31,7 +32,7 @@ namespace WordCounter.Services
         {
             if (string.IsNullOrWhiteSpace(directory) || !Directory.Exists(directory))
             {
-                throw new DirectoryNotFoundException();
+                throw new DirectoryNotFoundAppException(string.Format("The directory [{0}] was not found.", directory));
             }
 
             var searchOperation = recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
@@ -43,7 +44,7 @@ namespace WordCounter.Services
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             {
-                throw new FileNotFoundException();
+                throw new FileNotFoundAppException(string.Format("The file [{0}] was not found.", filePath));
             }
 
             var fileContent = File.ReadAllText(filePath);

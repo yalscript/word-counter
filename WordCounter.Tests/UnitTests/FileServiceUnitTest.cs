@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using WordCounter.Exceptions;
 using WordCounter.Services;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace WordCounter.Tests
         {
             var fileService = new FileService();
 
-            Assert.Throws<DirectoryNotFoundException>(() => fileService.GetTextFilePaths(null, true));
+            Assert.Throws<DirectoryNotFoundAppException>(() => fileService.GetTextFilePaths(null, true));
         }
 
         [Fact]
@@ -21,7 +22,7 @@ namespace WordCounter.Tests
         {
             var fileService = new FileService();
 
-            Assert.Throws<DirectoryNotFoundException>(() => fileService.GetTextFilePaths(string.Empty, true));
+            Assert.Throws<DirectoryNotFoundAppException>(() => fileService.GetTextFilePaths(string.Empty, true));
         }
 
         [Fact]
@@ -29,7 +30,7 @@ namespace WordCounter.Tests
         {
             var fileService = new FileService();
 
-            Assert.Throws<DirectoryNotFoundException>(() => fileService.GetTextFilePaths("   ", true));
+            Assert.Throws<DirectoryNotFoundAppException>(() => fileService.GetTextFilePaths("   ", true));
         }
 
         [Fact]
@@ -37,7 +38,7 @@ namespace WordCounter.Tests
         {
             var fileService = new FileService();
 
-            Assert.Throws<DirectoryNotFoundException>(() => fileService.GetTextFilePaths(@"C:\lkjashkjasdhfjk\kasjghjhf", true));
+            Assert.Throws<DirectoryNotFoundAppException>(() => fileService.GetTextFilePaths(@"C:\lkjashkjasdhfjk\kasjghjhf", true));
         }
 
         [Fact]
